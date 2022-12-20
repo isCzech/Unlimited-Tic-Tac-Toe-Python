@@ -28,8 +28,6 @@ minsize = 10  # minimum size of the initial playing field (square)
 def start_game():
     global move, board, player_sym, opponent_sym, player_fun, opponent_fun, player_style, opponent_style
 
-    print(f'move {player_sym}: {move}, board: {board}')
-
     for _ in range(100):
         draw_board()
         player_sym, opponent_sym = opponent_sym, player_sym
@@ -39,15 +37,10 @@ def start_game():
         move = player_fun(move)
         time.sleep(.1)
         claimed, lost = board
-        print(f'move {player_sym}: {move}, score: {score(move)}, '
-              f'#candidates: {len(next_move_candidates)}, #openlines: {len(open_lines)}, '
-              f'moves played: {player_sym} {len(claimed)}, {opponent_sym} {len(lost)}')
         if winning_lines():  # check for a winning move
             draw_board()
-            screen.addstr(1, xoff, f"Game Over, loser! Player {player_sym} won in {len(claimed)} moves.")
+            screen.addstr(1, xoff, f"Well done, {player_sym}! Player {opponent_sym} crushed in {len(claimed)} moves.")
             screen.addstr(2, xoff, f"Press any key to close the curses screen.")
-            print(f'Game Over, loser!\nPlayer {player_sym} won in {len(claimed)} moves.')
-            print_board()
             break
 
 
@@ -96,14 +89,15 @@ def score(move):
         # use open_lines global to slightly optimize the evaluation
 
         # to evaluate a board use a heuristic table of weights to value selected game patterns
-        # the table uses the fibonacci sequence for simplicity and easier extendability for K > 5
-        value_table_opponent = [0, 1, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144, 233, 377]  # generated for K=5
-        value_table_player = [0, 0, 0, 1, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144, 377]  # generated for K=5
+        # the tables are generated using the fibonacci sequence for simplicity and easy extendability for K > 5
+        value_table_opponent = [0, 1, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144, 233, 377]
+        value_table_player = [0, 0, 0, 1, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144, 377]
         value_table = value_table_opponent if viewpoint=='opponent' else value_table_player
 
         pattern_to_index = lambda pattern, count: ((K + 1) * 2 - len(pattern)) * (len(pattern) - 1) // 2 + count
         # a heuristic formula converting a (pattern, count) pair to an index into a table of relative weights
         # derived manually to provide somewhat satisfactory move evaluation results to beat a mediocre player
+        # Possible improvement: evaluate two simulated moves ahead, instead of just one
 
         c = Counter([line & marked for line in open_lines_])
         e = [value_table[pattern_to_index(pattern, count)] for pattern, count in c.items() if len(pattern) > 1]
@@ -152,32 +146,6 @@ def neighborhood(position=(0, 0), radius=R):
     return neighborhood_
 
 
-def move_gen():
-    # move generator for initial debugging in play()
-    yield 0, 1
-    yield 0, 1
-    yield -1, 0
-    yield 1, 0
-    yield -1, 2
-
-
-def print_board():
-    rows = range(-10, 11)
-    cols = range(-10, 11)
-    # TODO: adapt ranges to actual board status
-    d = {(i, j): ' ' if i and j else '.' for i in rows for j in cols}
-
-    for p in board[0]:  # claimed
-        d[p] = player_sym
-    for p in board[1]:  # lost
-        d[p] = opponent_sym
-
-    for i in rows:
-        for j in cols:
-            print(d[i, j], end=' ')
-        print()
-
-
 def visible_playfield():
     # Coordinates of the visible part of the board, i.e. upper left and bottom right corners.
     # Note: these are relative to the board, not the curses screen or the rectangle playfield
@@ -209,11 +177,14 @@ def draw_board():
         screen.addstr(yoff + i - ymin, xoff + 2*(j - xmin), player_sym, player_style)
     for i, j in lost:
         screen.addstr(yoff + i - ymin, xoff + 2*(j - xmin), opponent_sym, opponent_style)
-    for i, j in frozenset.union(*winning_lines(), frozenset()):  # highlight winning lines
-        screen.addstr(yoff + i - ymin, xoff + 2*(j - xmin), player_sym, player_style | curses.A_UNDERLINE)
     i, j = move  # last move's coordinates relative to the board
     y, x = yoff + i - ymin, xoff + 2*(j - xmin)  # last move's position relative to the screen
-    screen.addstr(y, x, player_sym, player_style | curses.A_UNDERLINE)
+    if (winning_set := frozenset.union(*winning_lines(), frozenset())):
+        for i, j in winning_set:  # highlight winning lines
+            screen.addstr(yoff + i - ymin, xoff + 2*(j - xmin), player_sym, winner_style)
+            screen.addstr(y, x, player_sym, winner_style | curses.A_UNDERLINE)
+    else:
+        screen.addstr(y, x, player_sym, player_style | curses.A_UNDERLINE)
     screen.move(y, x)  # place blinking cursor on the last move field
     screen.refresh()
 
@@ -261,6 +232,8 @@ screen = curses.initscr()  # initialize the curses screen
 curses.start_color()  # initalize the default color set
 curses.init_pair(1, curses.COLOR_GREEN, curses.COLOR_BLACK)
 curses.init_pair(2, curses.COLOR_YELLOW, curses.COLOR_BLACK)
+curses.init_pair(3, curses.COLOR_RED, curses.COLOR_BLACK)
+winner_style = curses.color_pair(3) | curses.A_BOLD
 
 player_fun = bot  # first player, symbol 'X'
 opponent_fun = human  # second player, symbol 'O'
@@ -275,10 +248,7 @@ try:
     start_game()
 except KeyError:
     screen.addstr(1, xoff, f"Game interrupted; press any key to close the curses screen.")
-    print(f"Game interrupted; press any key to close the curses screen.")
-    print_board()
 except ValueError:
     screen.addstr(1, xoff, f"Sorry, can't display, resize your terminal window and try again.")
-    print(f"Sorry, can't display, resize your terminal window and try again.")
     
 screen.getch()  # wait for key press and finish
