@@ -2,8 +2,14 @@ from collections import Counter
 from copy import deepcopy, copy
 from curses.textpad import rectangle
 from argparse import ArgumentParser
+from sys import exit
 import curses
 import time
+
+
+if __name__ != '__main__':
+    print("Do not import, just start from the CLI")
+    exit()
 
 
 ## ARGPARSE part
@@ -17,16 +23,19 @@ parser.add_argument("-o", "--O_player", choices=["bot", "human"], default="human
 parser.add_argument("-r", "--reverse", action="store_true",
                     help="reverse players; i.e. swap assignement to markers X and O")
 parser.add_argument("-d", "--debug", default=False, action="store_true",
-                    help="pause after each move")
-parser.add_argument("-s", "--sleep", default=0.1, type=float, action="store", metavar="seconds",
+                    help="pause bot vs bot game after each move")
+parser.add_argument("-s", "--sleep", nargs="?", default=0, const=0.1, type=float, metavar="seconds",
                     help="run sleep timer after each move")
-parser.add_argument('--version', action='version', version='%(prog)s 0.1')
+parser.add_argument("-v", "--version", action="version", version="%(prog)s 0.1")
 
 args = parser.parse_args()
 
-X_player = args.X_player if not args.reverse else args.O_player
-O_player = args.O_player if not args.reverse else args.X_player
-
+X_player = args.X_player
+O_player = args.O_player
+if args.reverse:
+    X_player, O_player = O_player, X_player
+sleep_time = args.sleep
+step_moves = args.debug and (X_player == 'bot') and (O_player == 'bot')
 
 ## GLOBALS part
 
@@ -34,6 +43,7 @@ O_player = args.O_player if not args.reverse else args.X_player
 # constants:
 K = 5  # number of consecutive positions marked with the same symbol required to win
 R = 1  # neighborhood radius; neighborhood represents all neighbors within R distance
+MAX = 200  # max number of moves; TODO: make it a parameter and introduce a stalemate
 
 # globals representing the game state:
 move = (0, 0)  # a move is represented by simply a tuple of coordinates (row, column) with the initial move to (0, 0)
@@ -317,19 +327,20 @@ def visible_playfield():
 def start_game():
     global move, board, player_sym, opponent_sym, player_fun, opponent_fun, player_style, opponent_style
 
-    for _ in range(200):
+    for _ in range(MAX):
         draw_board()
         player_sym, opponent_sym = opponent_sym, player_sym
         player_fun, opponent_fun = opponent_fun, player_fun
         player_style, opponent_style = opponent_style, player_style
         board = board[::-1]
         move = player_fun(move)
-        #time.sleep(.1)  # pace a bot vs bot match
-        #screen.getch()  # step a bot vs bot match
+        time.sleep(sleep_time)  # pace a bot vs bot match
+        if step_moves:
+            screen.getch()  # step a bot vs bot match
         claimed, _ = board
         if winning_lines():  # check for a winning move
             draw_board()
-            screen.addstr(1, xoff, f"Well done, {player_sym}! {opponent_sym} beaten up in {len(claimed)} moves.")
+            screen.addstr(1, xoff, f"Well done, {player_sym}! Player {opponent_sym} didn't survive {len(claimed)} moves.")
             screen.addstr(2, xoff, f"Press any key to close the curses screen.")
             break
 
