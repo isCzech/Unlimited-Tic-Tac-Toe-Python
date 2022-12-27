@@ -369,3 +369,4 @@ except ValueError:
     screen.addstr(1, xoff, f"Sorry, can't display, resize your terminal window and try again.")
     
 screen.getch()  # wait for key press and finish
+curses.endwin()
