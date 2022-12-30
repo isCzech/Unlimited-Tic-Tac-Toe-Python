@@ -10,5 +10,5 @@ Your game may look like this:
 It is, however, possible to try even more difficult version aiming at placing 6 consecutive markers. Here's an example of such a game:
 
 <p align="center">
-  <img src="https://user-images.githubusercontent.com/73360313/210018635-182dd8a5-8945-4fab-b053-6f4a2ecd1e9f.png">
+  <img src="https://user-images.githubusercontent.com/73360313/210083593-13c6d588-9463-416a-8b8e-542a46e07fee.png">
 </p>
