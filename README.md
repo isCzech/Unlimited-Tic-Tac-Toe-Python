@@ -19,7 +19,7 @@ Your game may look like this:
   <img src="https://user-images.githubusercontent.com/73360313/210018768-bed0c2ba-035a-417e-9fd3-b4b29d8ba3ac.png">
 </p>
 
-It is, however, possible to try even more difficult version aiming at placing 6 consecutive markers. Here's an example of such a game:
+It will, however, be possible to try even more difficult version aiming at placing 6 consecutive markers. Here's an example of such a game:
 
 <p align="center">
   <img src="https://user-images.githubusercontent.com/73360313/210083593-13c6d588-9463-416a-8b8e-542a46e07fee.png">
