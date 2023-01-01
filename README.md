@@ -10,7 +10,7 @@ Or, if you want to make the first move:
 
 `python pyskvorky -r`
 
-For instructions check:
+For further instructions check:
 
 `python pyskvorky -h`
 
