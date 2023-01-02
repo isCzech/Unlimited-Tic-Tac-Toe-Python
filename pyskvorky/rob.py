@@ -1,10 +1,14 @@
-"""This module implements an AI player for the Unlimited Tic-Tac-Toe game."""
+"""This module demonstrates how to present an alternative player module to the game control program.
+Simply copy your module to the root directory of the package and name your main function 'play()'.
+The control program will import the 'play()' function, pass a move as an argument and expect play()
+to return your countermove. For demonstration purposes a copy of 'bot.py' module has been used."""
+
 from collections import Counter
 from copy import copy
 
 # Note: it is a part of the API contract that the AI player's main function is called 'play'
 
-# Implementation note: what follows is the simplest implementation of a player I could think of.
+# Implementation note: the following is the simplest implementation of a player I could think of.
 # A more robust approach would be to implement a player as a class which would facilitate the
 # creation of players with strategy modifications by subclassing them from the base player.
 # By using modules one has to copy the module in order to create a modified player because,
@@ -46,7 +50,7 @@ def play(opponents_move):
     if opponents_move is None:
         # this the first move, place your marker at (0, 0) and update game status accordingly
         update_board((0, 0), claimed, lost)
-        return (0, 0)
+        return 0, 0
     # update board status after opponent's move, select the best countermove and update game status
     # next_move_candidates collect reasonable candidates for the next move evaluation and selection
     # IMPROVE: randomize the selection of the countermove from a set of equivalent moves
@@ -75,9 +79,9 @@ def update_board(players_move, players_set, opponents_set):
 
 def score(move):
     """Evaluates the board from both player's and opponent's perspective and returns the score."""
-    # copy the board and open_lines collection, evaluate the copies updated with the simalated move
+    # copy the board and open_lines collection, evaluate the copies updated with the simulated move
     # and return the score without affecting the previous game state (i.e. the board and open_lines)
-    # IMPROVE: evaluate recursively for each of opponent's next set of resonable moves
+    # IMPROVE: evaluate recursively for each of opponent's next set of reasonable moves
 
     def evaluate_board(fields_collection, value_table):
         # find valuable patterns, evaluate each of them and answer the total value of all patterns

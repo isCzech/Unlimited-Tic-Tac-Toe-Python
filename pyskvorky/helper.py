@@ -23,7 +23,7 @@ def envelope(position, length=K):
     # i.e. horizontal, vertical or any of the two diagonal
     # e.g. there is 20 lines in an envelope for each position (considering the default K=5)
     # Note: this is a copy of envelope() in bot module; it has to be copied here because the bot module
-    # can change it's implementation, name or in general change it's strategy and remove it altogether
+    # can change its implementation, name or in general change its strategy and remove it altogether
 
     row, col = position
     envelope_ = []
@@ -56,6 +56,10 @@ class DisplayError(Exception):
 
 
 class QuitGame(Exception):
+    """A custom exception used in enter_move()"""
+
+
+class DuplicatePlayer(Exception):
     """A custom exception used in enter_move()"""
 
 

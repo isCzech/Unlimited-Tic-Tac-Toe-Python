@@ -1,6 +1,7 @@
 """Get input arguments"""
 from argparse import ArgumentParser
 
+
 def get_cli_args():
     """Get input arguments"""
     parser = ArgumentParser(description="Unlimited Tic-Tac-Toe is a grown-up version of the classic 3x3 game, played by two players on an infinite two-dimensional board. Players try to place 5 consecutive markers in a row (vertical, horizontal or diagonal). The game starts by placing an X marker on any square, usually (0, 0), the 'center' of the infinite board. CONTROLS: arrows move the cursor, return enters player's move, escape quits the game. ALTERNATIVE CONTROLS: WASD as arrows, QEZX move the cursor diagonally, R back to the last move's position, C to the center of the field, space enters a move, shift-Q quits the game.", epilog="Enjoy!")
@@ -19,11 +20,11 @@ def get_cli_args():
 
     args = parser.parse_args()
 
-    X_player = args.X_player
-    O_player = args.O_player
+    x_player = args.X_player
+    o_player = args.O_player
     if args.reverse:
-        X_player, O_player = O_player, X_player
+        x_player, o_player = o_player, x_player
     sleep_time = args.sleep
-    step_moves = args.debug and (X_player != "human") and (O_player != "human")
+    step_moves = args.debug and (x_player != "human") and (o_player != "human")
 
-    return X_player, O_player, sleep_time, step_moves
+    return x_player, o_player, sleep_time, step_moves
