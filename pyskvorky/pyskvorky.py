@@ -135,10 +135,9 @@ def start_game():
 # a board consists of two collections of fields representing player's and opponent's marked positions
 # a move represents the last move, i.e. a tuple of coordinates (row, column) representing a position
 
+X_player, O_player, sleep_time, step_moves = get_cli_args()  # get cli arguments
 
 try:
-    X_player, O_player, sleep_time, step_moves = get_cli_args()  # get cli arguments
-
     screen = curses.initscr()  # initialize the curses screen
     curses.noecho()  # suppress echoing keypresses
     screen.keypad(True)  # enable keypad mode to receive special keys as multibyte escape sequences (e.g. KEY_LEFT)
@@ -179,7 +178,6 @@ except DisplayError:
 
 finally:
     screen.getch()  # wait for key press before finishing
-
     screen.keypad(False)
     curses.echo()
     curses.endwin()  # reset the original terminal window

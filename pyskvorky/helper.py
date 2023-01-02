@@ -69,4 +69,4 @@ class Player:
         self.style = style
         self.fields = fields or set()  # this is a hack to set a distinct mutable default value for each instance
         # https://stackoverflow.com/questions/2681243/how-should-i-declare-default-values-for-instance-variables-in-python
-        # setting a mutable default value using dataclasses is even more complicated and less readable
+        # setting a mutable default value using dataclasses seems more complicated and less readable
