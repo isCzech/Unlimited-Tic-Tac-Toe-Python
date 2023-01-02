@@ -1,6 +1,7 @@
 """Tests for pyskvorky.helper module."""
 from pyskvorky import helper
 
+
 def test_envelope():
     """Test envelope() for K=5"""
     # expected result of envelope((-1, 1), 5)

@@ -5,11 +5,23 @@ from pyskvorky import bot
 
 
 def test_globals():
-    """Test globals initialization."""
+    """Test globals initialization after import."""
+    # Note: run this test first, to test initialization status right after import
     assert bot.claimed == set()
     assert bot.lost == set()
     assert bot.next_move_candidates == set()
     assert bot.open_lines == set()
+
+
+@pytest.fixture
+def _init_board():
+    """Re-initialize the board"""
+    # Note: start the fixture name with '_' to prevent pylint warnings W0621 and W0623
+    # this is a pytest/pylint deficiency; recommended fix is the '_' prefix or use of 'name' parameter; see:
+    # https://stackoverflow.com/questions/46089480/pytest-fixtures-redefining-name-from-outer-scope-pylint
+    bot.claimed, bot.lost = set(), set()
+    bot.next_move_candidates = set()
+    bot.open_lines = set()
 
 
 @pytest.mark.parametrize('move', [(-1, -2), (1, 1), (0, 0)])
@@ -23,20 +35,11 @@ def test_play_subsequent_move(move):
 
 
 @pytest.mark.parametrize('move', [(-1, -2), (1, 1), (0, 0)])
-def test_update_board(move):
+def test_update_board(_init_board, move):
     """Test update_board() updates the board."""
+    countermove = bot.play(move)
     assert move in bot.lost
-
-
-@pytest.fixture
-def _init_board():
-    """Re-initialize the board"""
-    # Note: start the fixture name with '_' to prevent pylint warnings W0621 and W0623
-    # this is a pytest/pylint deficiency; recommended fix is the '_' or use 'name' parameter; see:
-    # https://stackoverflow.com/questions/46089480/pytest-fixtures-redefining-name-from-outer-scope-pylint
-    bot.claimed, bot.lost = set(), set()
-    bot.next_move_candidates = set()
-    bot.open_lines = set()
+    assert countermove in bot.claimed
 
 
 def test_initial_move(_init_board):
