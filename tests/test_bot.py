@@ -1,16 +1,8 @@
 """Tests for pyskvorky.bot module."""
 from numbers import Number
+from importlib import reload
 import pytest
 from pyskvorky import bot
-
-
-def test_globals():
-    """Test globals initialization after import."""
-    # Note: run this test first, to test initialization status right after import
-    assert bot.claimed == set()
-    assert bot.lost == set()
-    assert bot.next_move_candidates == set()
-    assert bot.open_lines == set()
 
 
 @pytest.fixture
@@ -24,26 +16,43 @@ def _init_board():
     bot.open_lines = set()
 
 
-@pytest.mark.parametrize('move', [(-1, -2), (1, 1), (0, 0)])
+@pytest.fixture
+def _prime_board():
+    """Populate the board with 3 moves."""
+    bot.claimed, bot.lost = {(0, 0), (0, 1), (0, 2)}, {(-1, 0), (-1, 2)}
+
+
+@pytest.mark.parametrize('move', [(-1, -2), (1, 1), (0, 0)], ids=str)
 def test_play_subsequent_move(move):
     """Test play() returns a tuple of ints."""
     countermove = bot.play(move)
-    assert isinstance(countermove, tuple)
     row, col = countermove
+    assert isinstance(countermove, tuple)
     assert isinstance(row, int)
     assert isinstance(col, int)
 
 
-@pytest.mark.parametrize('move', [(-1, -2), (1, 1), (0, 0)])
+@pytest.mark.parametrize('move', [(-1, -2), (1, 1), (0, 0)], ids=str)
 def test_update_board(_init_board, move):
-    """Test update_board() updates the board."""
+    """Test update_board() updates the board with move and countermove."""
+    # Note: ignore open_lines and next_move_candidates for the moment
     countermove = bot.play(move)
     assert move in bot.lost
     assert countermove in bot.claimed
 
 
+def test_globals():
+    """Test globals are initialized to empty sets after import."""
+    # Note: reload the module to test the initialization status
+    reload(bot)
+    assert bot.claimed == set()
+    assert bot.lost == set()
+    assert bot.next_move_candidates == set()
+    assert bot.open_lines == set()
+
+
 def test_initial_move(_init_board):
-    """Test bot's initial move."""
+    """Test bot's initial move and the board after the move."""
     assert bot.play(None) == (0, 0)
     assert bot.claimed == {(0, 0)}
     assert bot.lost == set()
@@ -97,22 +106,14 @@ nbr = {
     }
 
 
-@pytest.fixture
-def _prime_board():
-    """Populate the board with 3 moves."""
-    bot.claimed, bot.lost = {(0, 0), (0, 1), (0, 2)}, {(-1, 0), (-1, 2)}
-
-
-@pytest.mark.parametrize('position, radius', [((-1, 1), 1), ((-1, 1), 2), ((-1, 1), 3)])
+@pytest.mark.parametrize('position, radius', [((-1, 1), 1), ((-1, 1), 2), ((-1, 1), 3)], ids=str)
 def test_neighborhood_initial(_init_board, position, radius):
-    """Test neighborhood() limits the radius in the first and second move to 1."""
-    assert bot.neighborhood(position, radius) == nbr[1]
-    bot.claimed = {(0, 0)}  # player's board before the second move (ignore opponent's side)
+    """Test neighborhood() function limits the radius in the first move to 1."""
     assert bot.neighborhood(position, radius) == nbr[1]
 
 
-@pytest.mark.parametrize('position, radius', [((-1, 1), 1), ((-1, 1), 2), ((-1, 1), 3)])
+@pytest.mark.parametrize('position, radius', [((-1, 1), 1), ((-1, 1), 2), ((-1, 1), 3)], ids=str)
 def test_neighborhood_full(_prime_board, position, radius):
-    """Test neighborhood() function after three initial moves without limiting the radius."""
+    """Test neighborhood() function won't limit the radius after the initial few (three) moves."""
     # Note: use prime_board fixture to populate the board to avoid automatic radius adjustment
     assert bot.neighborhood(position, radius) == nbr[radius]
