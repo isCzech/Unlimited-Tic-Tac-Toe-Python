@@ -51,18 +51,6 @@ def visible_playfield(board_contents):
     return ymin, xmin, ymax, xmax
 
 
-class DisplayError(Exception):
-    """A custom exception used in draw_board()"""
-
-
-class QuitGame(Exception):
-    """A custom exception used in enter_move()"""
-
-
-class DuplicatePlayer(Exception):
-    """A custom exception used in enter_move()"""
-
-
 class Player:
     """Simple representation of a player."""
     # a player consists of a symbol, a function name implementing player's strategy, a visual style on the screen
@@ -74,3 +62,15 @@ class Player:
         self.fields = fields or set()  # this is a hack to set a distinct mutable default value for each instance
         # https://stackoverflow.com/questions/2681243/how-should-i-declare-default-values-for-instance-variables-in-python
         # setting a mutable default value using dataclasses seems more complicated and less readable
+
+
+class DisplayError(Exception):
+    """A custom exception."""
+
+
+class QuitGame(Exception):
+    """A custom exception."""
+
+
+class DuplicatePlayer(Exception):
+    """A custom exception."""

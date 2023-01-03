@@ -130,6 +130,7 @@ def neighborhood(position, radius=R):
     """A helper function to collect all neighboring positions within a given distance from a given position."""
 
     # limit the radius for the initial few moves to avoid nonsensical choices having equivalent scores
+    # Note: is this limiting really necessary? Needs more testing...
     radius = max(1, min(radius, len(claimed)))
     row, col = position
     neighborhood_ = set()
