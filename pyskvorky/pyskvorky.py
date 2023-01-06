@@ -6,6 +6,7 @@ WASD as arrows, QEZX move the cursor diagonally, R back to the last move's posit
 field, space enters a move, shift-Q quits the game."""
 
 from importlib import import_module
+import sys
 import curses
 from curses.textpad import rectangle
 from time import sleep
@@ -131,6 +132,7 @@ def start_game():
             draw_board()
             screen.addstr(1, xoff, f"Well done, {player.sym}! Player {opponent.sym} lost in {len(player.fields)} moves.")
             screen.addstr(2, xoff, "Press any key to close the curses screen.")
+            screen.getch()  # wait for key press to continue
             break
         # swap players before the next move
         player, opponent = opponent, player
@@ -144,16 +146,21 @@ try:
 
     if X_player == O_player and X_player != 'human':
         # the same AI player module can't be run against itself; maybe in the future...
-        raise DuplicatePlayer("You're trying to run the same module twice.")
+        raise DuplicatePlayer
 
     # import players requested via cli arguments --X_player and --O_player; no need to import a human player
-    # in case the player's module is not found in the app's directory an error is raised and caught
+    # if the player's module name is not found in the app's directory a ModuleNotFoundError is raised and caught
     # Note: it is a part of the API contract that the AI player's main function is called 'play'
     player1 = getattr(import_module(X_player), "play") if X_player != "human" else enter_move
     player2 = getattr(import_module(O_player), "play") if O_player != "human" else enter_move
 
-except ModuleNotFoundError as ex:
-    raise Exception("Invalid player module name or location.") from ex
+except ModuleNotFoundError:
+    print("ModuleNotFoundError: Invalid player module name or location.")
+    sys.exit()
+
+except DuplicatePlayer:
+    print("DuplicatePlayer: You're trying to run the same module twice.")
+    sys.exit()
 
 screen = curses.initscr()  # initialize the curses screen
 curses.noecho()  # suppress echoing key presses
@@ -184,15 +191,17 @@ try:
 except QuitGame:
     screen.addstr(1, xoff, "Game interrupted.")
     screen.addstr(2, xoff, "Press any key to close the curses screen.")
+    screen.getch()  # wait for key press to continue
 
 except DisplayError:
     screen.addstr(1, xoff, "Can't display your playfield.")
     screen.addstr(2, xoff, "Resize your terminal window and try again.")
     screen.addstr(3, xoff, "Press any key to close the curses screen.")
+    screen.getch()  # wait for key press to continue
 
 finally:
-    screen.getch()  # wait for key press before finishing
     screen.keypad(False)
     curses.echo()
     curses.endwin()  # reset the original terminal window
-# Note: using finally addresses a Linux display issue when terminating the script via CTRL+C
+    # Note: using finally addresses a Linux display issue when terminating the script via CTRL+C interrupt
+    # Note: screen.getch() must be outside finally, otherwise the interrupt inside getch() won't be caught

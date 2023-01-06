@@ -30,15 +30,21 @@ open_lines = set()  # all potentially winning, non-empty lines partially taken e
 # next_move_candidates and open_lines are being updated during the game to optimize the computation a bit
 
 # to evaluate the board use a heuristic table of weights to value selected game patterns
-# the tables can be generated using the fibonacci sequence for simplicity and easy extendability for K > 5
+# the tables can be generated using the Fibonacci sequence for simplicity and easy extendability for K > 5
 # it turns out it's better to use two distinct tables, one for evaluating the board from the player perspective and
 # one for evaluating the board from the opponent's perspective; it allows more flexibility to finetune the weights
-value_table_opponent = [0, 1, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144, 233, 377]
-value_table_player = [0, 0, 0, 1, 1, 2, 3, 5, 8, 13, 21, 34, 55, 144, 233, 377]
+# Note: consider testing Tribonacci sequence and compare with a player using Fibonacci sequence
+value_table_opponent = [0, 0, 1, 1, 2, 4, 7, 13, 24, 44, 81, 149, 274, 504, 927]  # Tribonacci
+value_table_player = [0, 0, 0, 0, 1, 1, 2, 4, 7, 13, 24, 44, 81, 274, 504, 1705]  # Tribonacci
+# to better understand the pattern_to_index function here are a few examples:
+# a winning pattern containing five symbols in a row maps to index 15 which translates to a value of 610 for the player
+# a pattern containing 4 symbols maps to either to index 13 or 14 (depending on how the 4 symbols are spread across the
+# winning line) which translates to a value of 144 or 233 for the player or to a value of 233 or 377 for the opponent;
+# a pattern containing 3 symbols maps to either of three indexes: 10, 11 or 12 depending on the shape of the pattern
 
 # similarly, evaluation tables for K = 6 can be generated in the same manner using the fibonacci sequence:
 # value_table_opponent = [0, 1, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144, 233, 377, 610, 987, 1597, 2584, 4181, 6765]
-# value_table_player = [0, 0, 0, 1, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144, 233, 377, 610, 987, 2584, 4181, 6765]
+# value_table_player = [0, 0, 0, 1, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144, 233, 377, 610, 987, 2584, 4181, 10946]
 # replacing the tables and changing the constant K to 6 will allow to play the game.
 
 
@@ -72,7 +78,7 @@ def update_board(players_move, players_set, opponents_set):
     players_set.add(players_move)
     next_move_candidates.update(neighborhood(players_move))
     next_move_candidates.difference_update(players_set | opponents_set)
-    conflicting_lines = {line for line in envelope(players_move) if not set(line).isdisjoint(opponents_set)}
+    conflicting_lines = [line for line in envelope(players_move) if not set(line).isdisjoint(opponents_set)]
     open_lines.update(envelope(players_move))
     open_lines.difference_update(conflicting_lines)
 
@@ -93,7 +99,7 @@ def score(move):
 
     claimed_ = copy(claimed)  # no need to copy lost because only claimed_ get updated
     open_lines_ = copy(open_lines)
-    # update simulated board state for move
+    # update simulated board state for move (same code as in update_board function except next_move_candidates)
     claimed_.add(move)
     conflicting_lines = [line for line in envelope(move) if not set(line).isdisjoint(lost)]
     open_lines_.update(envelope(move))
@@ -134,6 +140,7 @@ def neighborhood(position, radius=R):
     """A helper function to collect all neighboring positions within a given distance from a given position."""
 
     # limit the radius for the initial few moves to avoid nonsensical choices having equivalent scores
+    # Note: is this limiting really necessary? Needs more testing...
     radius = max(1, min(radius, len(claimed)))
     row, col = position
     neighborhood_ = set()
