@@ -22,7 +22,7 @@ def test_envelope():
     """Test envelope() for K=5"""
     # Note: this is not a duplicate test to test_envelope in test_bot:
     # envelope() implementations in both bot.py and helper.py modules are independent
-    
+
     # expected result of envelope((-1, 1), 5)
     env5 = [
         frozenset({(-5, -3), (-4, -2), (-3, -1), (-2, 0), (-1, 1)}),
