@@ -51,6 +51,24 @@ def visible_playfield(board_contents):
     return ymin, xmin, ymax, xmax
 
 
+def validate_move(move):
+    """Check move is a 2-tuple of ints."""
+    # Note: this is just a temporary measure to avoid potential confusing runtime errors
+    # start_game() needs refactoring anyway so let's just use asserts for the moment
+    # and replace them with proper error handling later; see:
+    # https://stackoverflow.com/questions/944592/best-practice-for-using-assert
+
+    assert isinstance(move, tuple)
+    assert len(move) == 2
+
+    # now that we know countermove is a 2-tuple, we can safely unpack it
+    row, col = move
+    assert isinstance(row, int)
+    assert isinstance(col, int)
+
+    return move  # returns only when move is validated, otherwise exits via AssertionError
+
+
 class Player:
     """Simple representation of a player."""
     # a player consists of a symbol, a function name implementing player's strategy, a visual style on the screen

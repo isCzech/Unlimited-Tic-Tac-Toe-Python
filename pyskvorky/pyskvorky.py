@@ -11,7 +11,7 @@ import curses
 from curses.textpad import rectangle
 from time import sleep
 from cli import get_cli_args
-from helper import winning_set, visible_playfield, DisplayError, QuitGame, DuplicatePlayer, Player
+from helper import winning_set, visible_playfield, validate_move, DisplayError, QuitGame, DuplicatePlayer, Player
 
 # Implementation note: to avoid false pylint E0401 import error, add .pylintrc file to app module as described in:
 # https://stackoverflow.com/questions/1899436/pylint-unable-to-import-error-how-to-set-pythonpath
@@ -118,9 +118,9 @@ def start_game():
 
     max_moves = 100  # max number of moves; IMPROVE: make it a parameter and introduce a stalemate
 
-    draw_board()  # draw an empty board for the human player to allow placing the initial move
+    draw_board()  # draw an empty board to let the human playerplace the initial move
     for _ in range(max_moves):  # IMPROVE: make MAX a parameter and introduce a stalemate
-        move = player.play(move)
+        move = validate_move(player.play(move))  # check if returned move meets api reqs; see note at validate_move()
         if player.play != enter_move:  # distinguish between a bot and a human player
             # IMPROVE: this condition deserves refactoring, ideally rename enter_move() and place into a module
             sleep(sleep_time)  # insert a delay between displaying each bot's move to simulate thinking :)
